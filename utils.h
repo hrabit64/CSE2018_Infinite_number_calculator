@@ -8,3 +8,6 @@ int isOper(char target);
 STACK convert_postfix(struct STACK *target);
 STACK reserve_stack(struct STACK *target);
 STACK stack_push_stack(struct STACK *target,struct STACK *amount);
+void make_same_decimal(struct STACK *a,struct STACK *b);
+void make_same_digit(struct STACK *a,struct STACK *b);
+void stack_swap(struct STACK *a,struct STACK *b);
