@@ -6,7 +6,7 @@ void push(struct STACK *target, char data)
     struct STACK *pushNode = malloc(sizeof(struct STACK));
     pushNode -> next = target ->next;
     pushNode -> data = data;
-
+    
     target -> next = pushNode;
 
 }

@@ -21,19 +21,19 @@ STACK clear_null(struct STACK *target){
 
 
 
-//get input while it get \n
+//get input while it get EOF
 void get_input(struct STACK *target){
 
     char num[10];
-    scanf("%c",num);
-    while (*num != '\n')
+    *num = getchar();
+
+    while (*num != EOF)
     {
         push(target,*num);
-        scanf("%c",num);
+        *num = getchar();
     }
 
 }
-
 
 
 //print target stack
@@ -88,6 +88,17 @@ int check_exception(struct STACK *target){
         return 1;
     }
     
+    if(isOper(*pre_char) == 3){
+        if(*pre_char == ')') right_bracket_counter++;
+        else if(*pre_char == '(') left_bracket_counter++;
+    }
+    
+    else if(isOper(*pre_char) > 0){
+        oper_counter++;
+    }
+
+    else target_num_counter++;
+
     while(1){
 
         chcker = chcker -> next;
@@ -96,21 +107,20 @@ int check_exception(struct STACK *target){
 
         //연산자가 두 번 연속으로 나오면 오류
         //단 (-1) 이런건 허용 처리
-        if(*pre_char > '0' && *check_char > '0')
+        //빈 괄호는 오류 처리
+        if(isOper(*pre_char) > 0 && isOper(*check_char) > 0)
         {
-            if(!((*pre_char == '(') || (*check_char == ')'))) 
+            if(!((*pre_char == '(') || (*pre_char == ')') ||(*check_char == '(') ||(*check_char == ')'))) 
             {
                 printf("연산자는 두번 연속으로 나올 수 없습니다. 1: %c 2: %c\n",*pre_char,*check_char);
                 return 1;
             }
+            if((*pre_char == '(')&&(*check_char == ')')) 
+            {
+                printf("빈 괄호는 허용되지 않습니다!\n");
+                return 1;
+            }
         }
-
-        //연산자 다음으로 나오는 첫 피연산자의 숫자가 0일 경우 예외처리
-        // if(isOper(*pre_char) > 0 && *check_char == '0') 
-        // {
-        //     printf("피 1: %c 2: %c\n",*pre_char,*check_char);
-        //     return 1;
-        // }
 
         //연산자라면 연산자 갯수에 + 1
         if(isOper(*check_char) > 0) oper_counter++;
@@ -139,6 +149,14 @@ int check_exception(struct STACK *target){
         //이전 문자를 현재 문자로 업데이트
         *pre_char = *check_char;
     }
+
+    //맨 마지막 글자 체크
+    if(!((*check_char == ')') || (*check_char >= '0') || (*check_char <= '9'))) 
+    {
+        printf("수식 맨 마지막 문자로 나올 수 없는 문자입니다. : %c\n",*check_char);
+        return 1;
+    }
+
     //연산자가 없으면 오류
     if(oper_counter == 0) {
         printf("연산자가 존재하지 않습니다\n");
@@ -293,6 +311,7 @@ STACK stack_push_stack(struct STACK *target,struct STACK *amount){
     
     return *target;
 }
+
 //소수점 동일하게
 void make_same_decimal(struct STACK *a,struct STACK *b){
 
@@ -307,8 +326,6 @@ void make_same_decimal(struct STACK *a,struct STACK *b){
 
     *a = reserve_stack(a);
     *b = reserve_stack(b);
-    
-
 
     while (1)
     {   
@@ -337,7 +354,7 @@ void make_same_decimal(struct STACK *a,struct STACK *b){
                 }
                 push(a_output,*a_num);
                 push(b_output,'0');
-                *a_num = pop(b);
+                *a_num = pop(a);
             }
             break;
         }
@@ -354,12 +371,12 @@ void make_same_decimal(struct STACK *a,struct STACK *b){
 
         }
     }
-    
-    stack_push_stack(a,a_output);
-    stack_push_stack(b,b_output);
+    stack_swap(a,a_output);
+    stack_swap(b,b_output);
     del_stack(b_output);
     del_stack(a_output);
 }
+
 //자리수 동일하게
 void make_same_digit(struct STACK *a,struct STACK *b){
 
@@ -423,6 +440,7 @@ void make_same_digit(struct STACK *a,struct STACK *b){
     del_stack(b_output);
     del_stack(a_output);
 }
+
 
 //스택을 서로 뒤 바꿈
 void stack_swap(struct STACK *a,struct STACK *b){

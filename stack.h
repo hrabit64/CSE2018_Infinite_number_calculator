@@ -5,7 +5,7 @@
 typedef struct STACK{
     struct STACK *next;
     char data;
-
+    int sign;
 } STACK;
 
 void push(struct STACK *target , char data);
