@@ -10,7 +10,13 @@ int main(){
 
     get_input(input_top);
     //공백제거
+    if(check_NULL_exception(input_top) == 1){
+        printf("입력값이 비어있습니다.\n");
+        exit(0);
+    }
     *input_top = clear_null(input_top);
+    stack_print(input_top);
+    *input_top = formula_edit(input_top);
     
     //스택 출력
     printf("---------------\n");
