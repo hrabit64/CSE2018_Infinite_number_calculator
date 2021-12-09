@@ -37,7 +37,17 @@ char head(struct STACK *target)
     struct STACK *headNode = target->next;
     *popData = headNode -> data;
 
+
     return *popData;
+}
+
+void head_set_sign(struct STACK *target,int sign){
+
+    if(target->next == NULL);
+
+    struct STACK *headNode = target->next;
+    headNode ->sign = sign;
+
 }
 
 void del_stack(struct STACK *target)

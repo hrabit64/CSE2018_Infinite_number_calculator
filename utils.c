@@ -1,7 +1,9 @@
 #include "utils.h"
 
+// 전처리 함수
+//-------------------------------------------------------------------------------------------
 
-// clear null space and return cleaned stack
+// 빈칸을 모두 제거하고, 빈칸이 제거 된 스택을 반환
 STACK clear_null(struct STACK *target){
 
     STACK *clear_stack = malloc(sizeof(STACK));
@@ -21,7 +23,7 @@ STACK clear_null(struct STACK *target){
 
 
 
-//get input while it get EOF
+//EOF가 나올 때 까지 입력 받음
 void get_input(struct STACK *target){
 
     char num[10];
@@ -34,24 +36,27 @@ void get_input(struct STACK *target){
     }
 
 }
-
-
-//print target stack
-void stack_print(struct STACK *target){
+//입력값이 공백인지 확인함
+int check_NULL_exception(struct STACK *target){
     char out[10];
     STACK *next_node = malloc(sizeof(STACK));
-
     next_node = target->next;
+
+    // 입력값이 아에 없는지 확인
+    if(next_node == NULL) return 1;
     *out = next_node -> data;
 
-    while (next_node != NULL) 
-    {     
-        printf("%c",*out);
-        next_node = next_node -> next;
-        if(next_node != NULL) *out = next_node -> data;
-    } 
+    //입력이 공백 밖에 없는지 확인
+    while(1){
+        if(*out != ' ') return 0;
 
-    printf("\n");
+        next_node = next_node -> next;
+        if(next_node == NULL) return 1;
+        *out = next_node -> data;
+
+    }
+    return 1;
+
 }
 
 
@@ -70,6 +75,11 @@ int check_exception(struct STACK *target){
     //연산자 갯수
     int oper_counter = 0;
 
+    // 00 + 01 같은거 체크하기 위한 변수
+    int zero_check = 0;
+
+    //소수를 체크하기 위한 변수
+    int isFloat = 0;
     //이전 문자를 저장할 변수
     char pre_char[10];
 
@@ -81,8 +91,7 @@ int check_exception(struct STACK *target){
     //나머지는 오류 처리
 
     *pre_char = chcker -> data;
-
-    if(!( (*pre_char == '-') || (*pre_char == '(') || (*pre_char > '0') || (*pre_char <= '9'))) 
+    if(!( (*pre_char == '-') || (*pre_char == '(') || ((*pre_char >= '0') && (*pre_char <= '9')))) 
     {
         printf("수식 맨 첫 문자로 나올 수 없는 문자입니다. : %c\n",*pre_char);
         return 1;
@@ -94,17 +103,25 @@ int check_exception(struct STACK *target){
     }
     
     else if(isOper(*pre_char) > 0){
-        oper_counter++;
+        oper_counter=1;
     }
 
-    else target_num_counter++;
+    
+    else {
+        target_num_counter++;
+        }
 
+    if(*pre_char == '0') zero_check = 1;
     while(1){
 
         chcker = chcker -> next;
         if(chcker == NULL) break;
         *check_char = chcker -> data;
 
+        if(isOper(*check_char) == -1){
+            printf("수식에 사용할 수 없는 문자입니다. %c\n",*check_char);
+            return 1;
+        }
         //연산자가 두 번 연속으로 나오면 오류
         //단 (-1) 이런건 허용 처리
         //빈 괄호는 오류 처리
@@ -122,29 +139,54 @@ int check_exception(struct STACK *target){
             }
         }
 
-        //연산자라면 연산자 갯수에 + 1
-        if(isOper(*check_char) > 0) oper_counter++;
+        //연산자 확인
+        if(isOper(*check_char) > 0) {
 
-        //만약 피 연산자라면 0~9가 맞는지 확인하고 피 연산자의 갯수 + 1
+            //. 다음에 연산자 나오면 오류
+            if(*pre_char == '.'){
+                printf("소수 입력이 잘못되었습니다.\n");
+                return 1;
+            }
+            oper_counter = 1;
+            isFloat = 0;
+        }
+        
+        //피 연산자 
         if(isOper(*check_char) == 0){
+            
+            // . 두번 나오는거 처리 ex) 12.123.2
+            if(*check_char == '.' && isFloat == 1){
+                printf("소수 입력이 잘못되었습니다.\n");
+                return 1;
+            }
+            if(*check_char == '.') isFloat = 1;
+            if((*pre_char != '0') && (zero_check == 1)) zero_check = 0;
+
+            //숫자인지 확인.
             if(!('0' <= *check_char <='9')) {
                 printf("피 연산자는 0~9의 숫자로 구성되어야 합니다. %c\n",*check_char);
                 return 1;
                 }
-            target_num_counter++;
+            //0이 연속으로 나오면 오류
+            if(zero_check == 1 && *check_char != '.'){
+                printf("숫자의 앞자리가 0입니다. %c%c\n",*pre_char,*check_char);
+                return 1;
+            }
+            if(target_num_counter < 3) target_num_counter++;
+
+            if(isOper(*pre_char) > 0  && *check_char == '0') zero_check = 1;
         }
 
+        //괄호 판단
         if(isOper(*check_char) == 3){
-            if(*check_char == ')') right_bracket_counter++;
-            else if(*check_char == '(') left_bracket_counter++;
-        }
-
-        //왼쪽 괄호가 안나왔는데 오른쪽 괄호가 나오면 오류
-        if(isOper(*check_char) == 3){
+            //왼쪽 괄호가 안나왔는데 오른쪽 괄호가 나오면 오류
             if(*check_char == ')' && left_bracket_counter == 0) {
                 printf("왼쪽 괄호 없이 오른쪽 괄호는 사용할 수 없습니다.\n");
                 return 1;
                 }
+
+            if(*check_char == ')') right_bracket_counter++;
+            else if(*check_char == '(') left_bracket_counter++;
         }
         //이전 문자를 현재 문자로 업데이트
         *pre_char = *check_char;
@@ -170,7 +212,7 @@ int check_exception(struct STACK *target){
     }
 
     //피연산자가 없어도 오류
-    if(target_num_counter == 0) {
+    if(target_num_counter  < 2) {
         printf("피 연산자는 2개 이상 필요합니다.\n");
         return 1;
     }
@@ -178,6 +220,30 @@ int check_exception(struct STACK *target){
     return 0;
 }
 
+//공백처리가 된 수식을 수정함 예) -4 => 0 - 4 / 20(20 + 5) => 20*(20+5)
+STACK formula_edit(struct STACK *target){
+    STACK *res = malloc(sizeof(STACK));
+    res -> next = NULL;
+
+    char pre_num[10];
+    char num[10];
+    *pre_num = pop(target);
+    if(*pre_num == '-') push(res,'0');
+    push(res,*pre_num);
+    
+    while (1)
+    {   
+        *num = pop(target);
+        if(*num == '\0') break;
+        
+        if(*pre_num == '(' && *num == '-') push(res,'0');
+        if(isOper(*pre_num) == 0 && *num == '(') push(res,'*');
+        push(res,*num);
+        *pre_num = *num;
+    }
+    *res = reserve_stack(res);
+    return *res;
+}
 int isOper(char target){
     
     switch (target)
@@ -198,9 +264,12 @@ int isOper(char target){
 
     
     default:
-        return 0;
+        break;
 
     }
+    if(('0' <= target && target <= '9') || (target == '.') || (target == ' ')) return 0;
+
+    return -1;
 }
 
 // make postfix
@@ -279,6 +348,27 @@ STACK convert_postfix(struct STACK *target){
     del_stack(oper_stack);
     
     return *postfix_stack;
+}
+//-------------------------------------------------------------------------------------------
+
+// 유틸리티 함수들
+
+//스택을 출력함
+void stack_print(struct STACK *target){
+    char out[10];
+    STACK *next_node = malloc(sizeof(STACK));
+
+    next_node = target->next;
+    *out = next_node -> data;
+
+    while (next_node != NULL) 
+    {     
+        printf("%c",*out);
+        next_node = next_node -> next;
+        if(next_node != NULL) *out = next_node -> data;
+    } 
+
+    printf("\n");
 }
 
 //stack 뒤집기
