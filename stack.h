@@ -19,3 +19,6 @@ char pop(struct STACK *target);
 char head(struct STACK *target);
 void head_set_sign(struct STACK *target,int sign);
 void del_stack(struct STACK *target);
+int head_sign(struct STACK *target);
+void del_head(struct STACK *target);
+void stack_copy(struct STACK *a,struct STACK *b);

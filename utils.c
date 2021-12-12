@@ -119,7 +119,7 @@ int check_exception(struct STACK *target){
         *check_char = chcker -> data;
 
         if(isOper(*check_char) == -1){
-            printf("수식에 사용할 수 없는 문자입니다. %c\n",*check_char);
+            printf("수식에 사용할 수 없는 문자입니다. (%c)\n",*check_char);
             return 1;
         }
         //연산자가 두 번 연속으로 나오면 오류
@@ -272,6 +272,34 @@ int isOper(char target){
     return -1;
 }
 
+int isOperSign(char target){
+    
+    switch (target)
+    {
+    case '(':
+    case ')':
+        return 3;
+
+
+    case '+':
+    case '-':
+        return 1;
+
+
+    case '*':
+    case '/':
+        return 2;
+
+    
+    default:
+        break;
+
+    }
+    if(('0' <= target && target <= '9') || (target == '.') || (target == ' ') || (target == '$')) return 0;
+
+    return -1;
+}
+
 // make postfix
 STACK convert_postfix(struct STACK *target){
 
@@ -291,24 +319,24 @@ STACK convert_postfix(struct STACK *target){
         if(*num == '\0') break;
 
         oper_priority = isOper(*num);
-
+        
         // 피 연산자일 때
         if(oper_priority < 1) push(postfix_stack,*num);
 
         //연산자 일 때
         else{
-
             //공백으로 피연산자랑 분리
-            if(head(postfix_stack) != ' ') push(postfix_stack,' ');
+            if(head(postfix_stack) != ' ' && oper_priority != 3) push(postfix_stack,' ');
 
             // )라면 ( 가 나올 때 까지 모든 연산자 출력
             if(*num == ')'){
-                
                 while (1)
                 {   
                     *num = pop(oper_stack);
                     if(*num == '(') break;
+                    if(head(postfix_stack) != ' ') push(postfix_stack,' ');
                     push(postfix_stack,*num);
+                    if(head(postfix_stack) != ' ') push(postfix_stack,' ');
                 }
             }
 
@@ -317,32 +345,30 @@ STACK convert_postfix(struct STACK *target){
             {   
                 push(oper_stack,*num);
             }
-            
             // 우선순위가 같거나 낮으면 자신이 우선순위가 높을 때 까지 oper stack에서 pop
             else{
                 while (1)
                 {   
-                    if(isOper(head(oper_stack)) < oper_priority) {
+                    if(isOper(head(oper_stack)) < oper_priority || head(oper_stack) == '(') {
                         push(oper_stack,*num);
-                        
                         break;
                     }
+                    if(head(postfix_stack) != ' ') push(postfix_stack,' ');
                     push(postfix_stack,pop(oper_stack));
                     if(head(postfix_stack) != ' ') push(postfix_stack,' ');
                 }
             }
-        }       
+        }
+        
     }
-
     if(head(postfix_stack) != ' ') push(postfix_stack,' ');
-
     // 모든 피 연산자를 출력했다면, oper stack에 남은 요소 모두 출력
     while (1)
     {
         *num = pop(oper_stack);
         if(*num == '\0') break;
-        push(postfix_stack,*num);
         if(head(postfix_stack) != ' ') push(postfix_stack,' ');
+        push(postfix_stack,*num);
     }
 
     del_stack(oper_stack);
@@ -370,6 +396,23 @@ void stack_print(struct STACK *target){
 
     printf("\n");
 }
+//stack 복사 b -> a로
+void stack_copy(struct STACK *a,struct STACK *b){
+    char out[10];
+    STACK *next_node = malloc(sizeof(STACK));
+
+    next_node = a->next;
+    *out = next_node -> data;
+
+    while (next_node != NULL) 
+    {     
+        push(b,*out);
+        next_node = next_node -> next;
+        if(next_node != NULL) *out = next_node -> data;
+    } 
+
+    printf("\n");
+}
 
 //stack 뒤집기
 STACK reserve_stack(struct STACK *target){
@@ -391,14 +434,13 @@ STACK reserve_stack(struct STACK *target){
 // amount의 값을 모두 팝하여 target 스택에 푸쉬함.
 STACK stack_push_stack(struct STACK *target,struct STACK *amount){
     char num[10];
-
     while (1)
     {
         *num = pop(amount);
         if(*num == '\0') break;
         push(target,*num);
+        
     }
-    
     return *target;
 }
 

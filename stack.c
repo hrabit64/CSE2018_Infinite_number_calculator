@@ -6,7 +6,6 @@ void push(struct STACK *target, char data)
     struct STACK *pushNode = malloc(sizeof(struct STACK));
     pushNode -> next = target ->next;
     pushNode -> data = data;
-    
     target -> next = pushNode;
 
 }
@@ -27,6 +26,18 @@ char pop(struct STACK *target)
     return popData;
 
 }
+void del_head(struct STACK *target)
+{
+
+    if(target->next != NULL){
+        
+        struct STACK *popNode = target->next;
+        target -> next = popNode -> next;
+        free(popNode);
+    }
+        
+
+}
 
 char head(struct STACK *target)
 {
@@ -44,10 +55,7 @@ char head(struct STACK *target)
 void head_set_sign(struct STACK *target,int sign){
 
     if(target->next == NULL);
-
-    struct STACK *headNode = target->next;
-    headNode ->sign = sign;
-
+    if(sign == 1) push(target,'$');
 }
 
 void del_stack(struct STACK *target)
@@ -62,3 +70,4 @@ void del_stack(struct STACK *target)
     free(target);
     
 }
+

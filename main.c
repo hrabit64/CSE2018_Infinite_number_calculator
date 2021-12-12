@@ -1,7 +1,6 @@
 #include "cal.h"
 
-int main(){
-
+void run(){
     STACK *input_top = malloc(sizeof(STACK));
     input_top ->next = NULL;
 
@@ -17,7 +16,7 @@ int main(){
     *input_top = clear_null(input_top);
     stack_print(input_top);
     *input_top = formula_edit(input_top);
-    
+  
     //스택 출력
     printf("---------------\n");
     printf("input\n");
@@ -40,6 +39,10 @@ int main(){
 
         *input_top = calculate(input_top);
         *input_top = clear_null(input_top);
+        if(head(input_top) == '$'){
+            del_head(input_top);
+            push(input_top,'-');
+        }
         printf("---------------\n");
         printf("calculate fin!\n");
         printf("---------------\n");
@@ -47,6 +50,11 @@ int main(){
     }
     
     del_stack(input_top);
+}
+
+int main(){
+
+    run();
     return 0;
 
 }
